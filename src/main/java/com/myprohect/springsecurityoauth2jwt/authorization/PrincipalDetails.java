@@ -1,4 +1,4 @@
-package authorization;
+package com.myprohect.springsecurityoauth2jwt.authorization;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

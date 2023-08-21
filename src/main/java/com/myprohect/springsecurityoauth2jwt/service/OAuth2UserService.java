@@ -1,4 +1,4 @@
-package service;
+package com.myprohect.springsecurityoauth2jwt.service;
 
 public class OAuth2UserService {
 
