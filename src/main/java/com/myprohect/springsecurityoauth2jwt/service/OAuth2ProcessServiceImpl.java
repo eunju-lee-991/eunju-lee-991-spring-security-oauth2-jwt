@@ -24,12 +24,14 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class OAuth2ProcessServiceImpl implements OAuth2ProcessService {
+    private final UserService userService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final String KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token";
     private final String NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
     private final String KAKAO_PROFILE_URL = "https://kapi.kakao.com/v2/user/me";
     private final String NAVER_PROFILE_URL = "https://openapi.naver.com/v1/nid/me";
-
+    private final String KAKAO_REFRESH_URL = "https://kauth.kakao.com/oauth/token";
+    private final String NAVER_REFRESH_URL = "https://nid.naver.com/oauth2.0/token";
 
     @Override
     public OAuthToken getToken(String code, String provider) throws IOException {
@@ -100,7 +102,7 @@ public class OAuth2ProcessServiceImpl implements OAuth2ProcessService {
                     .refreshToken((String) map.get("refresh_token"))
                     .tokenType((String) map.get("token_type"))
                     .expiresIn(expiresIn)
-                    .refreshTokenExpiresIn(provider.equals("kakao") ? (int) map.get("refresh_token_expires_in") : null)
+//                    .refreshTokenExpiresIn(provider.equals("kakao") ? (int) map.get("refresh_token_expires_in") : null)
                     .build();
 
         } else { // 에러 발생
@@ -156,8 +158,6 @@ public class OAuth2ProcessServiceImpl implements OAuth2ProcessService {
                 email = (String) kakaoAccount.get("email");
                 nickname = (String) profile.get("nickname");
                 profileImage = (String)profile.get("profile_image_url");
-
-
             } else if (provider.equals("naver")) {
                 Map<String, String> profileMap = (LinkedHashMap) map.get("response");
                 providerId = profileMap.get("id");
@@ -167,7 +167,7 @@ public class OAuth2ProcessServiceImpl implements OAuth2ProcessService {
                 profileImage = profileMap.get("profile_image");
             }
 
-//            user = userRepository.findByEmail(email);
+            user = userService.findUser(provider, providerId);
 
             if (user == null) {
                 user = User.builder().name(name)
@@ -177,20 +177,73 @@ public class OAuth2ProcessServiceImpl implements OAuth2ProcessService {
                         .providerId(providerId)
                         .provider(provider)
                         .role(RoleConstant.ROLE_USER)
-                        .createDate(LocalDateTime.now())
                         .password(passwordEncoder.encode(providerId))
                         .build();
 
-//                userRepository.save(user);
-                user.setId(999999); // 생성할 때 받은 Id
+                user = userService.join(user);
             }
         }
 
         return user;
     }
 
+    // 아직 테스트 안 해봄!
     @Override
-    public OAuthToken refreshAccessToken(String refreshToken) {
+    public OAuthToken refreshAccessToken(String refreshToken, String provider) throws IOException {
+        HttpURLConnection connection = null;
+        String url = null;
+        int responseCode;
+
+        StringBuilder sb = new StringBuilder();
+        String clientId;
+        String clientSercret;
+
+        if (provider.equals("kakao")) {
+            clientId = OAuth2Constant.KAKAO_CLIENT_ID;
+            url = KAKAO_REFRESH_URL;
+
+            sb.append("grant_type=" + "refresh_token");
+            sb.append("&client_id=" + clientId);
+            sb.append("&refresh_token=" + refreshToken);
+        } else if (provider.equals("naver")) {
+            clientId = OAuth2Constant.NAVER_CLIENT_ID;
+            clientSercret = OAuth2Constant.NAVER_CLIENT_SECRET;
+            url = NAVER_REFRESH_URL;
+
+            sb.append("grant_type=" + "refresh_token");
+            sb.append("&client_id=" + clientId);
+            sb.append("&client_secret=" + clientSercret);
+            sb.append("&refresh_token=" + refreshToken);
+        }
+
+        connection = getConnection(url, "POST", true);
+        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
+        bw.write(sb.toString());
+        bw.flush();
+
+        responseCode = connection.getResponseCode();
+        String response = getResposeString(connection.getInputStream());
+
+        log.info("{} getRefreshToken response code: {}", provider, responseCode);
+        log.info("Response: {}", response);
+
+        if (responseCode == 200) {
+            JsonParser jsonParser = new JacksonJsonParser();
+            Map<String, Object> map = jsonParser.parseMap(response);
+            String accessToken = (String) map.get("access_token");
+            String tokenType = (String) map.get("token_type");
+            Integer expiresIn = (Integer) map.get("expires_in");
+
+            OAuthToken oAuthToken = OAuthToken.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .tokenType(tokenType)
+                    .expiresIn(expiresIn)
+                    .build();
+        }
+
         return null;
     }
 

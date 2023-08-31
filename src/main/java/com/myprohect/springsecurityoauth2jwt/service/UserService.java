@@ -6,14 +6,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+
 public interface UserService {
 
     // 가입
-    int join(User user);
+    User join(User user);
 
     // 조회
     User findUser(int id);
+
+    User findUser(String provider, String providerId);
 
     // 전체 조회
     List<User> findAllUsers();

@@ -1,11 +1,9 @@
 package com.myprohect.springsecurityoauth2jwt.model;
 
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
@@ -20,12 +18,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String email;
-//    private String username;
     private String password;
     private String name;
     private String nickname;
     private String profileImage;
     private String role;
+    @Column(name = "create_date")
+    @CreationTimestamp
     private LocalDateTime createDate;
     private LocalDateTime updateDate;
     private String provider;
