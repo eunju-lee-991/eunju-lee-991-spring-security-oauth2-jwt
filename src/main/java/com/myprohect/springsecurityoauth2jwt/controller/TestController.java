@@ -11,21 +11,27 @@ public class TestController {
         System.out.println("index");
         return "Index";
     }
-    @GetMapping("/test")
-    public String test(){
-        System.out.println("test");
-        return "String";
+
+    @GetMapping("/api/test/anyone")
+    public String anyone(){
+        System.out.println("anyone");
+
+        return "everybody is welcomed";
     }
 
-    @GetMapping("/user")
+    @GetMapping("/api/test/user")
     public String user(){
-        System.out.println("useruser");
-        return "useruser";
+        System.out.println("user user");
+        return "user user";
     }
-
-    @GetMapping("/api/login")
-    public String apiLogin(){
-        System.out.println("apiLogin");
-        return "apiLogin";
+    @GetMapping("/api/test/manager")
+    public String manager(){
+        System.out.println("manager manager");
+        return "manager manager";
+    }
+    @GetMapping("/api/test/admin")
+    public String admin(){
+        System.out.println("admin admin");
+        return "admin admin";
     }
 }

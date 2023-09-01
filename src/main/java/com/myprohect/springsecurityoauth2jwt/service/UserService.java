@@ -13,7 +13,7 @@ public interface UserService {
     User join(User user);
 
     // 조회
-    User findUser(int id);
+    User findUser(Integer id);
 
     User findUser(String provider, String providerId);
 

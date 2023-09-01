@@ -163,7 +163,7 @@ public class OAuth2ProcessServiceImpl implements OAuth2ProcessService {
                 providerId = profileMap.get("id");
                 name = profileMap.get("name");
                 email = profileMap.get("email");
-                nickname = URLEncoder.encode(profileMap.get("nickname"), "UTF-8");
+                nickname = profileMap.get("nickname");
                 profileImage = profileMap.get("profile_image");
             }
 

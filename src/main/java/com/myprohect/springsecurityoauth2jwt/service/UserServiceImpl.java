@@ -20,9 +20,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findUser(int id) {
+    public User findUser(Integer id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("id가 " + id + "인 회원을 찾을 수 없습니다.")); // 나중에 custom 예외 만들기
 
-        return null;
+        return user;
     }
 
     @Override
