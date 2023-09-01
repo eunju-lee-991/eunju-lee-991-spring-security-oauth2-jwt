@@ -1,6 +1,8 @@
 package com.myprohect.springsecurityoauth2jwt.configuration;
 
+import com.auth0.jwt.JWTVerifier;
 import com.myprohect.springsecurityoauth2jwt.filter.JwtAuthorizationFilter;
+import com.myprohect.springsecurityoauth2jwt.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +23,8 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final JWTVerifier jwtVerifier;
+    private final UserService userService;
 
     @Bean
     AuthenticationManager authenticationManager(
@@ -39,7 +43,7 @@ public class SecurityConfig {
                 .formLogin().disable()
 //                .addFilter(new JwtAuthenticationFilter(authenticationManager(authenticationConfiguration)))
 //                .addFilter(new JwtAuthorizationFilter(authenticationManager(authenticationConfiguration), userRepository))
-                .addFilter(new JwtAuthorizationFilter(authenticationManager(authenticationConfiguration)))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager(authenticationConfiguration), jwtVerifier, userService))
                 .authorizeRequests()
                 .antMatchers("/api/test/user/**").access("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
                 .antMatchers("/api/test/manager/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")

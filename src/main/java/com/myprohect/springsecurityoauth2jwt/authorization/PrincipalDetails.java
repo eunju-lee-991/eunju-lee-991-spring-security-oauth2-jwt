@@ -1,45 +1,61 @@
 package com.myprohect.springsecurityoauth2jwt.authorization;
 
+import com.myprohect.springsecurityoauth2jwt.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 public class PrincipalDetails implements UserDetails {
 
+    private User user;
+
+    public PrincipalDetails(User user) {
+        System.out.println("Principal Details is called");
+        this.user = user;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        grantedAuthorities.add(() ->
+                user.getRole()
+        );
+
+        return grantedAuthorities;
     }
 
     @Override
     public String getPassword() {
-        return null;
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return user.getName();
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
+
 }
 
